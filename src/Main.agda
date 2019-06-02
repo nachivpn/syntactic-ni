@@ -76,42 +76,42 @@ module Main where
 
     -- βη convertibility relation (only the case needed for the proof)
     -- it is obviously very incomplete
-    data _≈βη_ : ∀ {Γ} {a} → Term a Γ → Term a Γ → Set where
-      ≈βη-cong  : ∀ {Γ} {a b} {f₁ f₂ : Term (a ⇒ b) Γ} {t₁ t₂ : Term a Γ}
-                → f₁ ≈βη f₂ → t₁ ≈βη t₂ → (f₁ ∙ t₁) ≈βη (f₂ ∙ t₂)
+    data _≈_ : ∀ {Γ} {a} → Term a Γ → Term a Γ → Set where
+      ≈-cong  : ∀ {Γ} {a b} {f₁ f₂ : Term (a ⇒ b) Γ} {t₁ t₂ : Term a Γ}
+                → f₁ ≈ f₂ → t₁ ≈ t₂ → (f₁ ∙ t₁) ≈ (f₂ ∙ t₂)
 
     -- βη convertibility is an equivalence relation
     postulate
-      ≈βη-refl  : ∀ {Γ} {a} → B.Reflexive (_≈βη_ {Γ = Γ} {a = a})
-      ≈βη-sym   : ∀ {Γ} {a} → B.Symmetric (_≈βη_ {Γ = Γ} {a = a})
-      ≈βη-trans : ∀ {Γ} {a} → B.Transitive (_≈βη_ {Γ = Γ} {a = a})
+      ≈-refl  : ∀ {Γ} {a} → B.Reflexive (_≈_ {Γ = Γ} {a = a})
+      ≈-sym   : ∀ {Γ} {a} → B.Symmetric (_≈_ {Γ = Γ} {a = a})
+      ≈-trans : ∀ {Γ} {a} → B.Transitive (_≈_ {Γ = Γ} {a = a})
 
     postulate
-      -- propositional equality implies βη convertibility
-      ≡⇒≈βη : ∀ {Γ} {a} {t₁ t₂ : Term a Γ} → t₁ ≡ t₂ → t₁ ≈βη t₂
 
       -- nbe is consistent
-      nbe-consitency : ∀ {Γ} {a} → (t : Term a Γ) → t ≈βη qNf (norm t)
+      nbe-consitency : ∀ {Γ} {a} → (t : Term a Γ) → t ≈ qNf (norm t)
 
       -- constant functions applied return constant results
       λtrue          : ∀ {ℓ} {Γ} {a} → (e : Term a Γ)
-                     → ((`λ (Term (〈 ℓ 〉 Bool) (Γ `, a) ∋ η true)) ∙ e) ≈βη (η true)
+                     → ((`λ (Term (〈 ℓ 〉 Bool) (Γ `, a) ∋ η true)) ∙ e) ≈ (η true)
 
       λfalse         : ∀ {ℓ} {Γ} {a} → (e : Term a Γ)
-                     → ((`λ (Term (〈 ℓ 〉 Bool) (Γ `, a) ∋ η false)) ∙ e) ≈βη (η false)
+                     → ((`λ (Term (〈 ℓ 〉 Bool) (Γ `, a) ∋ η false)) ∙ e) ≈ (η false)
 
-
+    -- propositional equality implies βη convertibility
+    ≡⇒≈ : ∀ {Γ} {a} {t₁ t₂ : Term a Γ} → t₁ ≡ t₂ → t₁ ≈ t₂
+    ≡⇒≈ refl = ≈-refl
 
     -- noninterference like property for λ-sec
     ni : ∀ (t : Term (〈 H 〉 Bool ⇒ 〈 L 〉 Bool) Ø)
          → (a₁ a₂ : Term (〈 H 〉 Bool) Ø)
-         → (t ∙ a₁) ≈βη (t ∙ a₂)
+         → (t ∙ a₁) ≈ (t ∙ a₂)
     ni t a₁ a₂ with main t
-    ni t a₁ a₂ | inj₁ ctrue  with ≈βη-trans (nbe-consitency t) (≡⇒≈βη (cong qNf ctrue))
-    ... | p with ≈βη-cong {t₁ = a₁} {t₂ = a₁} p ≈βη-refl | ≈βη-cong {t₁ = a₂} {t₂ = a₂} p ≈βη-refl
-    ... | pp | qq  with ≈βη-trans pp (λtrue a₁) | ≈βη-trans qq (λtrue a₂)
-    ... | s1 | s2  = ≈βη-trans s1 (≈βη-sym s2)
-    ni t a₁ a₂ | inj₂ cfalse with ≈βη-trans (nbe-consitency t) (≡⇒≈βη (cong qNf cfalse))
-    ... | p with ≈βη-cong {t₁ = a₁} {t₂ = a₁} p ≈βη-refl | ≈βη-cong {t₁ = a₂} {t₂ = a₂} p ≈βη-refl
-    ... | pp | qq  with ≈βη-trans pp (λfalse a₁) | ≈βη-trans qq (λfalse a₂)
-    ... | s1 | s2  = ≈βη-trans s1 (≈βη-sym s2)
+    ni t a₁ a₂ | inj₁ ctrue  with ≈-trans (nbe-consitency t) (≡⇒≈ (cong qNf ctrue))
+    ... | p with ≈-cong {t₁ = a₁} {t₂ = a₁} p ≈-refl | ≈-cong {t₁ = a₂} {t₂ = a₂} p ≈-refl
+    ... | pp | qq  with ≈-trans pp (λtrue a₁) | ≈-trans qq (λtrue a₂)
+    ... | s1 | s2  = ≈-trans s1 (≈-sym s2)
+    ni t a₁ a₂ | inj₂ cfalse with ≈-trans (nbe-consitency t) (≡⇒≈ (cong qNf cfalse))
+    ... | p with ≈-cong {t₁ = a₁} {t₂ = a₁} p ≈-refl | ≈-cong {t₁ = a₂} {t₂ = a₂} p ≈-refl
+    ... | pp | qq  with ≈-trans pp (λfalse a₁) | ≈-trans qq (λfalse a₂)
+    ... | s1 | s2  = ≈-trans s1 (≈-sym s2)
