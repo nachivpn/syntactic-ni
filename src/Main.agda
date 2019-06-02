@@ -93,7 +93,7 @@ module Main where
       -- nbe is consistent
       nbe-consitency : ∀ {Γ} {a} → (t : Term a Γ) → t ≈βη qNf (norm t)
 
-      -- constant functions applied return constant arguments
+      -- constant functions applied return constant results
       λtrue          : ∀ {ℓ} {Γ} {a} → (e : Term a Γ)
                      → ((`λ (Term (〈 ℓ 〉 Bool) (Γ `, a) ∋ η true)) ∙ e) ≈βη (η true)
 
